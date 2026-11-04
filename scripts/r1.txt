@@ -1,0 +1,51 @@
+enable
+configure terminal
+
+hostname R1
+no ip domain-lookup
+
+interface Ethernet0/0
+ description RED-LAN
+ ip address 10.7.30.2 255.255.255.0
+ no shutdown
+exit
+
+end
+write memory
+
+configure terminal
+
+! Direcciones fuera del rango dinámico
+ip dhcp excluded-address 10.7.30.1 10.7.30.9
+ip dhcp excluded-address 10.7.30.201 10.7.30.254
+
+! Pool DHCP para la LAN
+ip dhcp pool LAN-POOL
+ network 10.7.30.0 255.255.255.0
+ default-router 10.7.30.2
+ dns-server 8.8.8.8 8.8.4.4
+ lease 1
+exit
+
+end
+write memory
+
+configure terminal
+
+! Solo el servidor Zabbix puede consultar el equipo
+ip access-list standard SNMP-ZABBIX
+ permit host 10.7.30.253
+ deny any log
+exit
+
+! Comunidad de solo lectura
+snmp-server community zbx-ro-0730 RO SNMP-ZABBIX
+
+! Información del sistema (visible en Zabbix)
+snmp-server location Laboratorio-ITLA-2025-0730
+snmp-server contact Arlene Fernandez Herrera
+snmp-server ifindex persist
+
+end
+write memory
+
