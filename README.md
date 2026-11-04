@@ -411,16 +411,16 @@ network:
   ethernets:
     ens33:
       dhcp4: true
-    ens33:
-      dhcp4: true
       dhcp-identifier: mac
       dhcp4-overrides:
         use-routes: false
         use-dns: false
+    ens34:
+      dhcp4: true
 ```
 
-* `ens33` conserva el acceso a Internet (ruta por defecto y DNS).
 * `ens33` pide su dirección al Router. `dhcp-identifier: mac` envía la MAC como identificador, que es lo que busca la reserva. `use-routes: false` evita una segunda ruta por defecto por la LAN.
+* `ens34` conserva el acceso a Internet (ruta por defecto y DNS). 
 
 ```bash
 sudo netplan apply
