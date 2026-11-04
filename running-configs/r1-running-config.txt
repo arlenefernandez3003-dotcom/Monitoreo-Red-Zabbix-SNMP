@@ -1,0 +1,128 @@
+Current configuration : 1556 bytes
+!
+! Last configuration change at 19:04:16 UTC Wed Nov 4 2026
+!
+version 15.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname R1
+!
+boot-start-marker
+boot-end-marker
+!
+aqm-register-fnf
+!
+!
+no aaa new-model
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+!
+
+
+!
+ip dhcp excluded-address 10.7.30.1 10.7.30.9
+ip dhcp excluded-address 10.7.30.201 10.7.30.254
+!
+ip dhcp pool LAN-POOL
+ network 10.7.30.0 255.255.255.0
+ default-router 10.7.30.2
+ dns-server 8.8.8.8 8.8.4.4
+!
+ip dhcp pool ZABBIX-RESERVA
+ host 10.7.30.253 255.255.255.0
+ client-identifier 0100.0c29.6fdc.05
+ default-router 10.7.30.2
+ dns-server 8.8.8.8 8.8.4.4
+ client-name ZABBIX
+!
+!
+!
+no ip domain lookup
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+redundancy
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ description RED-LAN
+ ip address 10.7.30.2 255.255.255.0
+!
+interface Ethernet0/1
+ no ip address
+!
+interface Ethernet0/2
+ no ip address
+ shutdown
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+!
+ip access-list standard SNMP-ZABBIX
+ permit 10.7.30.253
+ deny   any log
+!
+!
+snmp-server community zbx-ro-0730 RO SNMP-ZABBIX
+snmp-server ifindex persist
+snmp-server location Laboratorio-ITLA-2025-0730
+snmp-server contact Arlene Fernandez Herrera
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+!
+line con 0
+ logging synchronous
+line aux 0
+line vty 0 4
+ login
+ transport input none
+!
+!
+end
