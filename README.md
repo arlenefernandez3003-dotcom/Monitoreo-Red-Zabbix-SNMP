@@ -39,7 +39,6 @@
 7. [Cumplimiento de requisitos](#7-cumplimiento-de-requisitos)
 8. [Capturas de Pantalla](#8-capturas-de-pantalla)
 9. [Estructura del Repositorio](#9-estructura-del-repositorio)
-10. [Referencias](#10-referencias)
 
 ---
 
@@ -735,11 +734,3 @@ Todas las capturas están en la carpeta [`screenshots/`](screenshots/).
 ```
 
 ---
-
-## 10. Referencias
-
-* Zabbix LLC. *Zabbix 7.0 Documentation: Installation from packages* y *Monitoring with SNMP*. zabbix.com.
-* Cisco Systems. *Cisco IOS Network Management Command Reference: SNMP*. cisco.com.
-* Cisco Systems. *Cisco IOS IP Addressing Services Command Reference: DHCP*. cisco.com.
-* Case, J. et al. (1990). *RFC 1157: A Simple Network Management Protocol (SNMP)*. IETF.
-* Droms, R. (1997). *RFC 2131: Dynamic Host Configuration Protocol*. IETF.
