@@ -105,10 +105,10 @@ Zabbix (10.7.30.253) ──SNMP v2c, solo lectura──► SW1 (10.7.30.3)
 |---|---|---|---|---|---|---|
 | **R1** | Et0/0 | 10.7.30.2 | /24 | — | Estática | Gateway de la LAN, servidor DHCP y agente SNMP |
 | **SW1** | Vlan10 | 10.7.30.3 | /24 | 10.7.30.2 | Estática | Conmutación y agente SNMP |
-| **Servidor Zabbix** (Ubuntu) | ens34 | 10.7.30.253 | /24 | 10.7.30.2 | **DHCP** (reserva) | Servidor de monitoreo |
+| **Servidor Zabbix** (Ubuntu) | ens33 | 10.7.30.253 | /24 | 10.7.30.2 | **DHCP** (reserva) | Servidor de monitoreo |
 | **PC Cliente** (Windows) | Ethernet | 10.7.30.10 – .200 (rango) | /24 | 10.7.30.2 | **DHCP** | Cliente de prueba y acceso a la GUI de Zabbix |
 
-> El servidor Zabbix tiene un segundo adaptador (`ens33`, red NAT de VMware) que solo se usa para descargar los paquetes durante la instalación. La monitorización se hace por `ens34`, dentro de la LAN.
+> El servidor Zabbix tiene un segundo adaptador (`ens33`, red NAT de VMware) que solo se usa para descargar los paquetes durante la instalación. La monitorización se hace por `ens33`, dentro de la LAN.
 
 ### 2.3 Parámetros DHCP
 
@@ -365,7 +365,7 @@ El servidor corre sobre **Ubuntu Server 24.04 LTS** en una máquina virtual de V
 | Sistema | Ubuntu Server 24.04 LTS |
 | CPU / RAM | 2 vCPU / 4 GB |
 | Adaptador 1 (`ens33`) | NAT (`VMnet8`): salida a Internet para descargar paquetes |
-| Adaptador 2 (`ens34`) | Red virtual Host-only sin DHCP de VMware, enlazada a PNETLab con un nodo Cloud hacia `Ethernet0/2` de `SW1` |
+| Adaptador 2 (`ens33`) | Red virtual Host-only sin DHCP de VMware, enlazada a PNETLab con un nodo Cloud hacia `Ethernet0/2` de `SW1` |
 
 Cada máquina virtual entra a la topología por **un solo cable**.
 
@@ -375,13 +375,13 @@ Cada máquina virtual entra a la topología por **un solo cable**.
 
 El servidor Zabbix obtiene su IP por DHCP. Como Zabbix y las listas de acceso SNMP necesitan una dirección fija, el Router le entrega siempre la misma mediante una **reserva**.
 
-**1. Obtener la dirección MAC de `ens34` (en Ubuntu):**
+**1. Obtener la dirección MAC de `ens33` (en Ubuntu):**
 
 ```bash
-ip -br link show ens34
+ip -br link show ens33
 ```
 
-Ejemplo de salida: `ens34  UP  00:0c:29:ab:cd:ef`. El identificador de cliente que usa el Router es `01` seguido de la MAC. Para esa MAC es `0100.0c29.abcd.ef`.
+Ejemplo de salida: `ens33  UP  00:0c:29:ab:cd:ef`. El identificador de cliente que usa el Router es `01` seguido de la MAC. Para esa MAC es `0100.0c29.abcd.ef`.
 
 **2. Crear la reserva en el Router (con la MAC real):**
 
@@ -399,7 +399,7 @@ end
 write memory
 ```
 
-**3. Configurar `ens34` como cliente DHCP (en Ubuntu):**
+**3. Configurar `ens33` como cliente DHCP (en Ubuntu):**
 
 ```bash
 sudo nano /etc/netplan/50-cloud-init.yaml
@@ -411,7 +411,7 @@ network:
   ethernets:
     ens33:
       dhcp4: true
-    ens34:
+    ens33:
       dhcp4: true
       dhcp-identifier: mac
       dhcp4-overrides:
@@ -420,7 +420,7 @@ network:
 ```
 
 * `ens33` conserva el acceso a Internet (ruta por defecto y DNS).
-* `ens34` pide su dirección al Router. `dhcp-identifier: mac` envía la MAC como identificador, que es lo que busca la reserva. `use-routes: false` evita una segunda ruta por defecto por la LAN.
+* `ens33` pide su dirección al Router. `dhcp-identifier: mac` envía la MAC como identificador, que es lo que busca la reserva. `use-routes: false` evita una segunda ruta por defecto por la LAN.
 
 ```bash
 sudo netplan apply
@@ -431,11 +431,11 @@ sudo netplan apply
 En Ubuntu:
 
 ```bash
-ip -4 addr show ens34
+ip -4 addr show ens33
 ip route
 ```
 
-`ens34` debe mostrar `10.7.30.253/24` con la etiqueta `dynamic`, y la ruta por defecto debe seguir saliendo por `ens33`.
+`ens33` debe mostrar `10.7.30.253/24` con la etiqueta `dynamic`, y la ruta por defecto debe seguir saliendo por `ens33`.
 
 En el Router:
 
@@ -685,7 +685,7 @@ El comando debe **fallar** con un error de acceso: la comunidad solo permite lec
 | **Router y Switch:** direccionamiento IP | Interfaz `Et0/0` del Router y `Vlan10` del Switch, con la tabla de dispositivos | 2.2, 3.1, 4.1 |
 | **Router y Switch:** servidor DHCP para la red LAN | `LAN-POOL` en el Router, con gateway, DNS y rango | 2.3, 3.2 |
 | **Router y Switch:** comunidad SNMP de solo lectura | `snmp-server community zbx-ro-0730 RO` en ambos equipos | 2.4, 3.3, 4.2 |
-| **Servidor Zabbix:** cliente DHCP | `ens34` con `dhcp4: true` y reserva `10.7.30.253` en el Router | 6.2 |
+| **Servidor Zabbix:** cliente DHCP | `ens33` con `dhcp4: true` y reserva `10.7.30.253` en el Router | 6.2 |
 | **Servidor Zabbix:** verificar los datos SNMP del Router y del Switch | Equipos `R1` y `SW1` con plantilla `Cisco IOS by SNMP`, datos y comandos `snmpwalk` | 6.5, 6.6, 6.7 |
 
 ---
@@ -701,8 +701,8 @@ Todas las capturas están en la carpeta [`screenshots/`](screenshots/).
 | 03 | [`03_router_snmp.png`](screenshots/03_router_snmp.png) | `show snmp community` y `show access-lists SNMP-ZABBIX` en R1 con la comunidad `zbx-ro-0730` de solo lectura. |
 | 04 | [`04_switch_ip.png`](screenshots/04_switch_ip.png) | `show ip interface brief` y `show vlan brief` en SW1 con `Vlan10: 10.7.30.3` en estado `up/up`. |
 | 05 | [`05_switch_snmp.png`](screenshots/05_switch_snmp.png) | `show snmp community` en SW1 con la comunidad `zbx-ro-0730` de solo lectura. |
-| 06 | [`06_zabbix_mac_reserva.png`](screenshots/06_zabbix_mac_reserva.png) | MAC de `ens34` en Ubuntu y reserva `ZABBIX-RESERVA` en el Router. |
-| 07 | [`07_zabbix_dhcp_cliente.png`](screenshots/07_zabbix_dhcp_cliente.png) | `ip -4 addr show ens34` con `10.7.30.253/24` dinámica y `show ip dhcp binding` en el Router. |
+| 06 | [`06_zabbix_mac_reserva.png`](screenshots/06_zabbix_mac_reserva.png) | MAC de `ens33` en Ubuntu y reserva `ZABBIX-RESERVA` en el Router. |
+| 07 | [`07_zabbix_dhcp_cliente.png`](screenshots/07_zabbix_dhcp_cliente.png) | `ip -4 addr show ens33` con `10.7.30.253/24` dinámica y `show ip dhcp binding` en el Router. |
 | 08 | [`08_pc_cliente_dhcp.png`](screenshots/08_pc_cliente_dhcp.png) | `ipconfig /all` en el PC Cliente con IP del rango `.10 – .200`, gateway y servidor DHCP `10.7.30.2`. |
 | 09 | [`09_zabbix_instalado.png`](screenshots/09_zabbix_instalado.png) | `systemctl status zabbix-server` con estado `active (running)`. |
 | 10 | [`10_zabbix_setup_requisitos.png`](screenshots/10_zabbix_setup_requisitos.png) | Asistente web de Zabbix, paso de comprobación de requisitos previos, todo en verde. |
