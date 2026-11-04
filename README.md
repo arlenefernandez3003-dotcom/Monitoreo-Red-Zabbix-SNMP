@@ -62,7 +62,34 @@ El direccionamiento se deriva de la matrícula `2025-0730`: los últimos cuatro 
 ### 2.1 Diagrama de Topología
 
 ```
-@@DIAGRAMA@@
+                         10.7.30.0/24
+                               │
+                        e0/0: 10.7.30.2
+                       ┌───────┴───────┐
+                       │    Router R1  │
+                       │  Cisco IOS    │
+                       └───────┬───────┘
+                          e0/0 │
+                       ┌───────┴───────┐
+                       │    Switch     │
+                       │  Cisco IOS    │
+                       └──┬────────┬───┘
+                        e1│        │e2
+               ┌──────────┘        └──────────┐
+               │ e0                        e0 │
+       ┌───────┴───────┐           ┌──────────┴───────┐
+       │    W10        │           │     ZABBIX       │
+       │  (Host Win.)  │           │   10.7.30.253    │
+       │  DHCP:        │           │   (Estática)     │
+       │  10.7.30.X    │           └──────────────────┘
+       └───────────────┘
+
+  Monitoreo SNMP:
+  Zabbix (10.7.30.253) ──SNMP v2c──► R1 (10.7.30.2)
+  Zabbix (10.7.30.253) ──SNMP v2c──► Switch (10.7.30.3)
+
+  Acceso GUI Zabbix desde W10:
+  W10 ──HTTP──► http://10.7.37.253/zabbix
 ```
 
 Monitoreo SNMP (UDP 161), iniciado siempre por el servidor Zabbix:
